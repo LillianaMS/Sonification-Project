@@ -1,13 +1,10 @@
 # Code for parsing cardiovascular data in Ubuntu's terminal. 
 # Goal: Having a separate dataset for each patient that contains only two columns (time stamp, hr value)
 
-# Create new files
-$ touch rawHR.txt > rawHR_no_NA.txt > hr.txt
-
 # Select and copy text from original file to new file "rawHR.txt"
-$ cat Raw_bp_data_for_figures.txt | grep BP.HR Raw_bp_data_for_figures.txt >> hr.txt
+$ cat Raw_bp_data_for_figures.txt | grep BP.HR Raw_bp_data_for_figures.txt >> rawHR.txt
 
-# Backup dataset on new file "rawHR_no_NA.txt"
+# Copy dataset on new file "rawHR_no_NA.txt"
 $ cp rawHR.txt  rawHR_no_NA.txt
 
 # Eliminate "NA" values and copy resulting dataset to new file "rawHR_no_NA.txt"
@@ -22,9 +19,10 @@ $ mv hr.txt patientHR
 $ cd patientHR
 
 # Create a file for each patient
-$ touch hr1.txt > hr3.txt > hr4.txt > hr5.txt > hr6.txt > hr7.txt > hr8.txt > hr9.txt
+$ touch hr1.txt hr3.txt hr4.txt hr5.txt hr6.txt hr7.txt hr8.txt hr9.txt
 
 # Extract patient no.1 rows and save on separate file
 $ cat hr.txt | grep HCR001 hr.txt >> hr1.txt
-$ touch hr_1.txt
+
+# Extract date and hour time stamp, and heart rate
 $ awk '{print $2,$3,$4}' hr1.txt > hr_1.txt 
