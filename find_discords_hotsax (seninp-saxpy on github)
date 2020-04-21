@@ -1,0 +1,20 @@
+# Script from seninp/saxpy on GitHub
+
+import numpy as np
+from saxpy.hotsax import find_discords_hotsax
+from numpy import genfromtxt
+from io import StringIO
+
+dat = u"0., 0., 0., 0., 0., -0.270340178359072, -0.367828308500142, 0.666980581124872, 1.87088147328446, 2.14548907684624, 0.119483882364649, -0.222311941138971, -0.74669456611669, -0.0663660879732063, 0., 0., 0., 0., 0."
+
+np.genfromtxt(StringIO(dat), delimiter=",")
+
+
+-----------------------------
+genfromtxt(dat, delimiter=',')    # Not working
+
+-------------------------------
+
+dd = genfromtxt(dat, delimiter=',')    # This line doesn't work on my interpreter  
+discords = find_discords_hotsax(dd)
+discords
