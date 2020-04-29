@@ -1,0 +1,35 @@
+#!/usr/bin/python
+# sax_via_sliding_ window on hr_1
+
+import numpy as np
+from saxpy.sax import sax_via_window
+import os
+
+directory = '/mnt/c/Users/marre/Desktop/sonification_project/parsed_hr_data/patientHR/'
+
+for fileName in os.listdir(directory):
+    if fileName.endswith(".txt"):
+        patientHR = open(fileName, 'r')
+        line = patientHR.readline()
+
+        dat = np.array([])
+        while line:
+                hr_value = line.split()
+                dat = np.append(dat, int(hr_value[-1]))
+                line = patientHR.readline()
+        #print(dat)
+        sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, z_threshold=0.01)
+        #print(sax_none)
+
+        # Get size of each sax word
+        bag_of_patterns = {}
+        for key, val in sax_none.items():
+                bag_of_patterns[key] = len(val)
+        print((fileName) + " BAG OF PATTERNS: ")
+        print(bag_of_patterns)
+        print('\n' )
+        patientHR.close()
+
+        continue
+    else:
+        continue
