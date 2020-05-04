@@ -5,31 +5,86 @@ import numpy as np
 from saxpy.sax import sax_via_window
 import os
 
+# Extract heart rate values from text files, and perform sax_via_window for each patient
+def get_all_sax_none(location):
+        all_patients_sax = {}
+        for fileName in os.listdir(location):
+                if fileName.endswith(".txt"):
+                        patientHR = open(fileName, 'r')
+                        line = patientHR.readline()
+                        dat = np.array([])
+                        while line:
+                                hr_value = line.split()
+                                dat = np.append(dat, int(hr_value[-1]))
+                                line = patientHR.readline()
+                        # SAX method on parient hr
+                        sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, z_threshold=0.01)
+                        all_patients_sax[fileName] = sax_none
+                        patientHR.close()
+                        continue
+                else:
+                        continue
+
+        return(all_patients_sax)
+
+
+# Create bags of patterns
+def all_bags_of_patterns(all_patient_sax):
+        bags_of_patterns = {}
+        # Get size of each sax word
+        for patient in all_patient_sax.keys():
+                bags_of_patterns[patient] = {}
+                for pattern, freq in all_patient_sax[patient].items():
+                        bags_of_patterns[patient][pattern] = len(freq)
+        return(bags_of_patterns)
+
+
+# Assign indexes for each pattern and save them on an index dictionary
+def get_pattern_index(all_bags):
+        index_dict = {}
+        idx_ctr = 0
+        for patient in all_bags.keys():
+                for pattern in all_bags[patient].keys():
+                        if pattern in index_dict:
+                                idx_ctr += 1
+                        else:
+                                index_dict[pattern] = idx_ctr
+                                idx_ctr +=1
+        return(index_dict)
+
+
+# Each patient's pattern value is assigned to its corresponding index based on the index dictionary.
+def pattern_to_index(all_bags, index_dict):
+        patterns_aligned = {}
+        size = len(index_dict)
+        for patient in all_bags.keys():
+                patterns_aligned[patient] = [0] * size
+                for pattern, frequency in all_bags[patient].items():
+                        index = idx_dict[pattern]
+                        patterns_aligned[patient][index] = frequency
+        return(patterns_aligned)
+
+
+# ------------- main() ------------------
+
 directory = '/mnt/c/Users/marre/Desktop/sonification_project/parsed_hr_data/patientHR/'
 
-for fileName in os.listdir(directory):
-    if fileName.endswith(".txt"):
-        patientHR = open(fileName, 'r')
-        line = patientHR.readline()
+all_sax_none = get_all_sax_none(directory)
+print("ALL SAX NONE:")
+print(all_sax_none)
+print()
 
-        dat = np.array([])
-        while line:
-                hr_value = line.split()
-                dat = np.append(dat, int(hr_value[-1]))
-                line = patientHR.readline()
-        #print(dat)
-        sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, z_threshold=0.01)
-        #print(sax_none)
+all_bags = all_bags_of_patterns(all_sax_none)
+print("ALL BAGS OF PATTERNS:")
+print(all_bags)
+print()
 
-        # Get size of each sax word
-        bag_of_patterns = {}
-        for key, val in sax_none.items():
-                bag_of_patterns[key] = len(val)
-        print((fileName) + " BAG OF PATTERNS: ")
-        print(bag_of_patterns)
-        print('\n' )
-        patientHR.close()
+idx_dict = get_pattern_index(all_bags)
+print("INDEX DICTIONARY:")
+print(idx_dict)
+print()
 
-        continue
-    else:
-        continue
+indexed_pattern_dict = pattern_to_index(all_bags, idx_dict)
+print("INDEXED PATTERNS:")
+print(indexed_pattern_dict)
+print()
