@@ -1,90 +1,132 @@
 #!/usr/bin/python
-# sax_via_sliding_ window on hr_1
+# Program for discretizing patient heart rate data using the sax_via_sliding_ window algorithm
 
 import numpy as np
 from saxpy.sax import sax_via_window
 import os
+import matplotlib.pyplot as plt
+
 
 # Extract heart rate values from text files, and perform sax_via_window for each patient
 def get_all_sax_none(location):
-        all_patients_sax = {}
-        for fileName in os.listdir(location):
-                if fileName.endswith(".txt"):
-                        patientHR = open(fileName, 'r')
-                        line = patientHR.readline()
-                        dat = np.array([])
-                        while line:
-                                hr_value = line.split()
-                                dat = np.append(dat, int(hr_value[-1]))
-                                line = patientHR.readline()
-                        # SAX method on parient hr
-                        sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, z_threshold=0.01)
-                        all_patients_sax[fileName] = sax_none
-                        patientHR.close()
-                        continue
-                else:
-                        continue
+    all_patients_sax = {}
+    # Search for patient data sets with file extension .txt on directory
+    for fileName in os.listdir(location):
+        if fileName.endswith(".txt"):
+            patientHR = open(fileName, 'r')
+            patientID = "patient" + fileName[2:4]
+            line = patientHR.readline()
+            dat = np.array([])
+            while line:
+                hr_value = line.split()
+                dat = np.append(dat, int(hr_value[-1]))
+                line = patientHR.readline()
+            # Apply SAX method to patient heart rate value data set
+            sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, z_threshold=0.01)
+            all_patients_sax[patientID] = sax_none
+            patientHR.close()
+            continue
+        else:
+            continue
+    # Returns a dictionary with SAX strings/words and their locations within a dictionary of the patients     
+    return all_patients_sax
 
-        return(all_patients_sax)
 
-
-# Create bags of patterns
+# Create bag of patterns containing the frequency of each SAX string
 def all_bags_of_patterns(all_patient_sax):
-        bags_of_patterns = {}
-        # Get size of each sax word
-        for patient in all_patient_sax.keys():
-                bags_of_patterns[patient] = {}
-                for pattern, freq in all_patient_sax[patient].items():
-                        bags_of_patterns[patient][pattern] = len(freq)
-        return(bags_of_patterns)
+    bags_of_patterns = {}
+    # Get frequency of each sax string/word
+    for patient in sorted(all_patient_sax.keys()):
+        bags_of_patterns[patient] = {}
+        for pattern, freq in sorted(all_patient_sax[patient].items()):
+            bags_of_patterns[patient][pattern] = len(freq)
+    return bags_of_patterns
 
 
 # Assign indexes for each pattern and save them on an index dictionary
 def get_pattern_index(all_bags):
-        index_dict = {}
-        idx_ctr = 0
-        for patient in all_bags.keys():
-                for pattern in all_bags[patient].keys():
-                        if pattern in index_dict:
-                                idx_ctr += 1
-                        else:
-                                index_dict[pattern] = idx_ctr
-                                idx_ctr +=1
-        return(index_dict)
+    index_dict = {}
+    idx_ctr = 0
+    for patient in all_bags.keys():
+        for pattern in all_bags[patient].keys():
+            if pattern in index_dict:
+                idx_ctr += 1
+            else:
+                index_dict[pattern] = idx_ctr
+                idx_ctr += 1
+    return index_dict
 
 
 # Each patient's pattern value is assigned to its corresponding index based on the index dictionary.
 def pattern_to_index(all_bags, index_dict):
-        patterns_aligned = {}
-        size = len(index_dict)
-        for patient in all_bags.keys():
-                patterns_aligned[patient] = [0] * size
-                for pattern, frequency in all_bags[patient].items():
-                        index = idx_dict[pattern]
-                        patterns_aligned[patient][index] = frequency
-        return(patterns_aligned)
+    patterns_aligned = {}
+    size = len(index_dict)
+    for patient in all_bags.keys():
+        patterns_aligned[patient] = [0] * size
+        for pattern, frequency in all_bags[patient].items():
+            index = idx_dict[pattern]
+            patterns_aligned[patient][index] = frequency
+    return patterns_aligned
 
 
 # ------------- main() ------------------
 
-directory = '/mnt/c/Users/marre/Desktop/sonification_project/parsed_hr_data/patientHR/'
+# Location of datasets
+directory = 'C:/Users/marre/Desktop/sonification_project/parsed_hr_data/patientHR/'
 
+
+# Apply SAX on all patient data
 all_sax_none = get_all_sax_none(directory)
-print("ALL SAX NONE:")
-print(all_sax_none)
-print()
+print("SAX VIA SLIDING WINDOW:")
+for patient, dict in all_sax_none.items():
+    print(patient + ":")
+    print(dict)
+    print()
 
+
+# Get all bags of patterns
 all_bags = all_bags_of_patterns(all_sax_none)
 print("ALL BAGS OF PATTERNS:")
-print(all_bags)
-print()
+for key, value in all_bags.items():
+    print(key + ":")
+    print(value)
+    print()
 
+
+# Create dictionary with indexed words
 idx_dict = get_pattern_index(all_bags)
 print("INDEX DICTIONARY:")
 print(idx_dict)
 print()
 
+
+# Create a list of indexed words for each patient
 indexed_pattern_dict = pattern_to_index(all_bags, idx_dict)
 print("INDEXED PATTERNS:")
-print(indexed_pattern_dict)
-print()
+for patient, list in indexed_pattern_dict.items():
+    print(patient + ":")
+    print(list)
+    print()
+
+
+# PLOTS:
+
+# Create a list of keys to use in the plots
+dict_keys = []
+for keys in idx_dict.keys():
+    dict_keys.append(keys)
+# Plot a graph for each patient showing their frequency of SAX words
+for patient, list in all_bags.items():
+    plt.figure()
+    plt.title('Patient #' + patient[8:9])
+    plt.ylabel('FREQUENCY')
+    plt.xlabel('SAX WORD')
+    #plt.grid(True)
+    plt.ylim((0, 64))
+    plt.tick_params(axis='x', which='major', labelsize=14)
+    plt.tight_layout()
+    #plt.bar(patient, patient, color = 'b', width = 1)
+    plt.bar(all_bags[patient].keys(), all_bags[patient].values(), color= 'c', width=0.6)
+plt.show()
+
+
