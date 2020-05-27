@@ -1,4 +1,4 @@
-# Code for parsing cardiovascular data in Ubuntu's terminal. 
+# Code for parsing our cardiovascular data sets in Ubuntu's terminal. 
 # Goal: Having a separate dataset for each patient that contains only two columns (time stamp, hr value)
 
 # Select and copy text from original file to new file "rawHR.txt"
