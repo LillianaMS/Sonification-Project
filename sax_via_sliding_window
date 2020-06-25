@@ -18,6 +18,7 @@ def get_all_sax_none(location):
             line = patientHR.readline()
             dat = np.array([])
             while line:
+                # Separate the target row from the rest of the dataset in order to extract a value from its last column
                 hr_value = line.split()
                 dat = np.append(dat, int(hr_value[-1]))
                 line = patientHR.readline()
@@ -110,7 +111,6 @@ for patient, list in indexed_pattern_dict.items():
 
 
 # PLOTS:
-
 # Create a list of keys to use in the plots
 dict_keys = []
 for keys in idx_dict.keys():
