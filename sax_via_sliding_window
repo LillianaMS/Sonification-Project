@@ -73,7 +73,7 @@ def pattern_to_index(all_bags, index_dict):
 # ------------- main() ------------------
 
 # Location of datasets
-directory = 'C:/Users/marre/Desktop/sonification_project/parsed_hr_data/patientHR/'
+directory = 'C:/Users/user/project/parsed_hr_data/patientHR/'
 
 
 # Apply SAX on all patient data
